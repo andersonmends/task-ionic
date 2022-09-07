@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-// import { AlertController } from '@ionic/angular/providers/alert-controller';
 import { AlertController, PopoverController, ToastController } from '@ionic/angular';
 import { PopoverComponent } from '../popover/popover.component';
 import { TaskService } from '../services/task.service';
@@ -18,6 +17,10 @@ export class HomePage {
     public toastController: ToastController,
     public popoverController: PopoverController
   ) { }
+
+  ngOnInit() {
+    this.taskService.getFromStorage();
+  }
 
 
   async presentAlertDelete(index: number) {
@@ -57,7 +60,7 @@ export class HomePage {
             "-" +
             ((task.date.getMonth() + 1) < 10 ? "0" + task.date.getMonth() + 1 : task.date.getMonth() + 1) +
             "-" +
-          ((task.date.getDay()+1) <10 ? "0"+task.date.getDay():task.date.getDay())
+            ((task.date.getDay() + 1) < 10 ? "0" + task.date.getDay() : task.date.getDay())
         },
       ],
       buttons: [
@@ -68,9 +71,9 @@ export class HomePage {
         {
           text: 'Atualizar',
           handler: (alertData) => {
-            if (alertData.task != "") 
+            if (alertData.task != "")
               this.taskService.updateTask(index, alertData.task, alertData.date);
-             else {
+            else {
               this.presentToast();
               this.taskService.updateTask(index, alertData.task, alertData.date);
             }
@@ -109,7 +112,7 @@ export class HomePage {
           handler: (alertData) => {
             if (alertData.task != "")
               this.taskService.addTask(alertData.task, alertData.date);
-             else {
+            else {
               this.presentToast();
               this.presentAlertAdd();
             }
@@ -128,13 +131,14 @@ export class HomePage {
     toast.present();
   }
 
-  async presentPopover(e: Event) {
+  async presentPopover(e: any) {
     const popover = await this.popoverController.create({
       component: PopoverComponent,
       event: e,
+      translucent: true
     });
 
     return await popover.present();
-  
+
   }
 }
