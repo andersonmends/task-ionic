@@ -12,7 +12,6 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-
   <ion-segment [(ngModel)]="type">
     <ion-segment-button value="pending" layout="icon-start">
       <ion-icon name="alert-circle"></ion-icon>
@@ -24,46 +23,51 @@
     </ion-segment-button>
   </ion-segment>
 
-  <ion-list *ngIf="type == 'pending'">
-    <ion-item-sliding *ngFor="let task of taskService.getTasks(); let i = index">
-      <ion-item *ngIf="!task.done">
-        <ion-label>{{task.value}}</ion-label>
-        <ion-checkbox slot="start" [(ngModel)]="task.done" (ionChange)="taskService.setToStorage()"></ion-checkbox>
-        <ion-badge color="warning" *ngIf="task.date.getDate()">
-          {{task.date.getDate() + "/" + (task.date.getMonth()+1) + "/" + task.date.getFullYear()}}
-        </ion-badge>
-      </ion-item>
-      <ion-item-options side="end">
-        <ion-item-option color="success" (click)="presentAlertUpdate(i, task)">
-          <ion-icon name="create-outline" slot="icon-only"></ion-icon>
-        </ion-item-option>
-        <ion-item-option color="danger" (click)="presentAlertDelete(i)">
-          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
+  <div *ngIf="type == 'pending'">
+    <ion-list>
+      <ion-item-sliding *ngFor="let task of tasks | async">
+        <ion-item *ngIf="!task.done">
+          <ion-label>{{task.value}}</ion-label>
+          <ion-checkbox slot="start" (ionChange)="taskService.updateTaskDone(task.id, task)"></ion-checkbox>
+          <ion-badge color="warning" *ngIf="task.date">
+            {{task.date.toDate() | date: 'dd/MM/yyyy'}}
+          </ion-badge>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option color="success" (click)="presentAlertUpdate(task.id, task)">
+            <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="presentAlertDelete(task.id)">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </div>
 
-  <ion-list *ngIf="type == 'done'">
-    <ion-item-sliding *ngFor="let task of taskService.getTasks(); let i = index">
-      <ion-item *ngIf="task.done">
-        <ion-label>{{task.value}}</ion-label>
-        <ion-checkbox slot="start" [(ngModel)]="task.done" (ionChange)="taskService.setToStorage()"></ion-checkbox>
-        <ion-badge color="warning" *ngIf="task.date.getDate()">
-          {{task.date.getDate() + "/" + (task.date.getMonth()+1) + "/" + task.date.getFullYear()}}
-        </ion-badge>
-      </ion-item>
-      <ion-item-options side="end">
-        <ion-item-option color="success" (click)="presentAlertUpdate(i, task)">
-          <ion-icon name="create-outline" slot="icon-only"></ion-icon>c
-        </ion-item-option>
-        <ion-item-option color="danger" (click)="presentAlertDelete(i)">
-          <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
-        </ion-item-option>
-      </ion-item-options>
-    </ion-item-sliding>
-  </ion-list>
-
+  <div *ngIf="type=='done'">
+    <ion-list>
+      <ion-item-sliding *ngFor="let task of tasks | async">
+        <ion-item *ngIf="task.done">
+          <ion-label>{{task.value}}</ion-label>
+          <ion-checkbox slot="start" checked="true" (ionChange)="taskService.updateTaskDone(task.id, task)">
+          </ion-checkbox>
+          <ion-badge color="warning" *ngIf="task.date">
+            {{task.date.toDate() | date: 'dd/MM/yyyy'}}
+          </ion-badge>
+        </ion-item>
+        <ion-item-options side="end">
+          <ion-item-option color="success" (click)="presentAlertUpdate(task.id, task)">
+            <ion-icon name="create-outline" slot="icon-only"></ion-icon>c
+          </ion-item-option>
+          <ion-item-option color="danger" (click)="presentAlertDelete(task.id)">
+            <ion-icon name="trash-outline" slot="icon-only"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </div>
+  
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="presentAlertAdd()">
       <ion-icon name="add"></ion-icon>

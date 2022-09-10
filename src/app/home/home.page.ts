@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AlertController, PopoverController, ToastController } from '@ionic/angular';
 import { PopoverComponent } from '../popover/popover.component';
 import { TaskService } from '../services/task.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -10,7 +11,8 @@ import { TaskService } from '../services/task.service';
 })
 export class HomePage {
 
-  type: string = "pending";
+  public type: string = "pending";
+  public tasks: Observable<any[]>;
 
   constructor(private alertController: AlertController,
     public taskService: TaskService,
@@ -19,11 +21,11 @@ export class HomePage {
   ) { }
 
   ngOnInit() {
-    this.taskService.getFromStorage();
+    this.tasks = this.taskService.getFromFirestone();
   }
 
 
-  async presentAlertDelete(index: number) {
+  async presentAlertDelete(id) {
     const alert = await this.alertController.create({
       header: 'Excluir Tarefa?',
       buttons: [
@@ -33,7 +35,7 @@ export class HomePage {
         },
         {
           text: 'Excluir',
-          handler: () => this.taskService.deleteTask(index)
+          handler: () => this.taskService.deleteOnFireStore(id)
         }
       ]
     });
@@ -41,7 +43,7 @@ export class HomePage {
     await alert.present();
   }
 
-  async presentAlertUpdate(index: number, task) {
+  async presentAlertUpdate(id, task) {
     const alert = await this.alertController.create({
       header: 'Atualizar Tarefa?',
       inputs: [
@@ -56,11 +58,10 @@ export class HomePage {
           type: 'date',
           min: '2017-03-01',
           max: '2025-12-31',
-          value: task.date.getFullYear() +
-            "-" +
-            ((task.date.getMonth() + 1) < 10 ? "0" + task.date.getMonth() + 1 : task.date.getMonth() + 1) +
-            "-" +
-            ((task.date.getDay() + 1) < 10 ? "0" + task.date.getDay() : task.date.getDay())
+          value: task.date ? task.date.toDate().getFullYear() + "-" +
+            ((task.date.toDate().getMonth() + 1) < 10 ? "0" + task.date.toDate().getMonth() + 1 : task.date.toDate().getMonth() + 1)
+            + "-" +
+            ((task.date.toDate().getDate()) < 10 ? "0" + task.date.toDate().getDay() : task.date.toDate().getDate()):""
         },
       ],
       buttons: [
@@ -72,10 +73,10 @@ export class HomePage {
           text: 'Atualizar',
           handler: (alertData) => {
             if (alertData.task != "")
-              this.taskService.updateTask(index, alertData.task, alertData.date);
+              this.taskService.updateTask(id, alertData.task, alertData.date,task.done);
             else {
               this.presentToast();
-              this.taskService.updateTask(index, alertData.task, alertData.date);
+              this.presentAlertUpdate(id, task);
             }
           }
         }
